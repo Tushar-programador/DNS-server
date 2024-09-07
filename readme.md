@@ -7,7 +7,7 @@ This project is a custom DNS server built using Node.js. The server resolves dom
 - DNS resolution for A records
 - Caching for fast lookups
 - Logging of DNS queries
-- Dockerized for easy deployment
+
 
 
 ## Setup

@@ -9,6 +9,7 @@ This project is a custom DNS server built using Node.js. The server resolves dom
 - Logging of DNS queries
 - Dockerized for easy deployment
 
+
 ## Setup
 
 1. Clone the repository.

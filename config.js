@@ -1,5 +1,5 @@
 module.exports = {
-  port: 5333,
+  port: 533,
   ttl: 300,
   records: {
     "example.com": "192.0.2.1",

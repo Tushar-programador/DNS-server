@@ -1,49 +1,42 @@
 const dns2 = require("dns2");
-const { UDPServer } = dns2;
+const { Packet } = dns2;
+// const dnsRecords = require("./dnsRecords");
+const dnsRecords = {
+  "example.com": "192.0.2.1",
+};
 
+const server = dns2.createServer({
+  udp: true,
+  handle: (request, send) => {
+    const response = Packet.createResponseFromRequest(request);
+    const [question] = request.questions;
 
-const dgram = require('dgram');
-const client = dgram.createSocket('udp4');
+    console.log(`Received query for ${question.name}`);
 
-client.send(Buffer.from('Hello, server'), 5354, '127.0.0.1', (err) => {
-  if (err) console.error(err);
-  client.close();
-});
-
-const server = new UDPServer({
-  type: "udp4",
-  handle: async (request, send, rinfo) => {
-    console.log(`Received DNS request from ${rinfo.address}:${rinfo.port}`);
-
-    const { questions } = request;
-    const [question] = questions;
-    const { name } = question;
-
-    console.log(`Query for: ${name}`);
-
-    const answers = [
-      {
-        name,
-        type: dns2.Packet.TYPE.A,
-        class: dns2.Packet.CLASS.IN,
+    const ip = dnsRecords[question.name];
+    if (ip) {
+      response.answers.push({
+        name: question.name,
+        type: Packet.TYPE.A,
+        class: Packet.CLASS.IN,
         ttl: 300,
-        address: "192.0.2.1", // Example IP address for testing
-      },
-    ];
+        address: ip,
+      });
+    }
 
-    send({ answers });
-    console.log(`Response sent for: ${name}`);
+    send(response);
   },
 });
 
-server.listen(5354, () => {
-  console.log("DNS Server running on port 5354");
+server.listen({
+  udp: 5339, // Ensure this port is correct
+  address: "0.0.0.0", // Binding to all available interfaces
 });
 
-server.on("error", (err) => {
-  console.error("Error:", err);
+server.on("listening", () => {
+  console.log("DNS Server is listening on UDP port 5339");
 });
 
-server.on("close", () => {
-  console.log("Server closed");
+server.on("error", (error) => {
+  console.error("Error occurred:", error);
 });

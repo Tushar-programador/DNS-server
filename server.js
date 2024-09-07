@@ -1,40 +1,31 @@
 const dns2 = require("dns2");
 const { UDPServer } = dns2;
-const { cache } = require("./cache");
-const { getDNSRecord } = require("./dnsRecords");
-const logger = require("./logger");
 
-const server = UDPServer({
+const server = new UDPServer({
+  type: "udp4",
   handle: async (request, send, rinfo) => {
+    console.log("Received a DNS request!"); // Check if a request is received
+
     const { questions } = request;
     const [question] = questions;
     const { name } = question;
 
-    logger.log(`DNS query for ${name}`);
+    console.log(`Query for: ${name}`); // Log the queried domain
 
-    // First check cache
-    const cachedRecord = cache.get(name);
-    if (cachedRecord) {
-      logger.log(`Cache hit for ${name}`);
-      return send({
-        answers: cachedRecord,
-      });
-    }
+    const answers = [
+      {
+        name,
+        type: dns2.Packet.TYPE.A,
+        class: dns2.Packet.CLASS.IN,
+        ttl: 300,
+        address: "192.0.2.1", // Example IP address for testing
+      },
+    ];
 
-    // Get DNS record from database or file
-    const answers = await getDNSRecord(name);
-
-    if (answers.length > 0) {
-      cache.set(name, answers); // Cache the result
-    }
-
-    return send({
-      answers,
-    });
+    send({ answers });
   },
 });
 
-// Start the server on port 5333
 server.listen(5333, () => {
-  console.log("DNS Server running on port 5333");
+  console.log("DNS Server running on port 53");
 });

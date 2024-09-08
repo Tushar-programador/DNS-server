@@ -1,8 +1,4 @@
 module.exports = {
-  port: 533,
+  port: 5339, // Change to whatever port you need
   ttl: 300,
-  records: {
-    "example.com": "192.0.2.1",
-    "mywebsite.com": "192.0.2.2",
-  },
 };
